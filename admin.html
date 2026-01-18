@@ -1,13 +1,14 @@
 <!DOCTYPE html>
-<html>
+<html lang="ja">
 <head>
     <meta charset="UTF-8">
     <title>管理画面</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
-        body { font-family: sans-serif; text-align: center; padding-top: 50px; }
-        input, button { font-size: 18px; padding: 10px; margin: 10px; border-radius: 5px; border: 1px solid #ccc; }
-        button { background-color: #ff9800; color: white; cursor: pointer; border: none; }
+        body { font-family: sans-serif; text-align: center; padding: 50px; }
+        input, button { font-size: 18px; padding: 12px; margin: 10px; border-radius: 8px; border: 1px solid #ccc; }
+        button { background-color: #4CAF50; color: white; border: none; cursor: pointer; width: 220px; font-weight: bold; }
+        #status { margin-top: 20px; font-weight: bold; color: #666; }
     </style>
 </head>
 <body>
@@ -15,22 +16,26 @@
     <input id="n" type="text" placeholder="料理名" value="牛丼">
     <input id="p" type="number" placeholder="価格" value="800">
     <button id="b">登録を実行する</button>
-    <p id="s"></p>
+    <div id="status"></div>
 
     <script>
-        // あなたから教えていただいた最新のKEYを正確に反映しました
+        // あなたが送ってくれた「本物の長いKEY」を正確にセットしました
         const URL = "https://ooyvztatkhadbquwimhz.supabase.co";
-        const KEY = "sb_publishable_X43uA6B8_axn9ZJ2nLHvSw_lfvlWQ"; 
+        const KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9veXZ6dGF0a2hhZGJxdXdpbWh6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njg3MjAxNTQsImV4cCI6MjA4NDI5NjE1NH0.8j_E3GTtXfe0ufDVksZhjHYfWVQIGw6nino80USV8no"; 
 
         window.onload = function() {
             const supabase = supabasejs.createClient(URL, KEY);
-            
-            document.getElementById('b').onclick = async function() {
+            const btn = document.getElementById('b');
+            const status = document.getElementById('status');
+
+            btn.onclick = async function() {
                 const name = document.getElementById('n').value;
                 const price = document.getElementById('p').value;
-                const status = document.getElementById('s');
 
-                status.innerText = "⏳ 通信中...";
+                if(!name || !price) return alert("入力してください");
+                
+                status.innerText = "⏳ データベースへ送信中...";
+                btn.disabled = true;
 
                 try {
                     const { error } = await supabase
@@ -39,13 +44,15 @@
 
                     if (error) {
                         alert("エラー: " + error.message);
-                        status.innerText = "失敗しました";
+                        status.innerText = "❌ 失敗";
                     } else {
                         alert("✅ 成功！牛丼が登録されました！");
-                        status.innerText = "登録完了！";
+                        status.innerText = "✅ 登録完了しました！";
                     }
                 } catch (e) {
                     alert("接続失敗: " + e.message);
+                } finally {
+                    btn.disabled = false;
                 }
             };
         };
