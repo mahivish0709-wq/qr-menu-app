@@ -10,40 +10,50 @@
 <body class="bg-gray-50">
     <div id="app" class="max-w-md mx-auto min-h-screen pb-20">
         <header class="bg-white shadow-sm sticky top-0 z-10 p-4 text-center">
-            <h1 class="text-xl font-bold text-gray-800">Welcome!</h1>
+            <h1 id="shop-name" class="text-xl font-bold text-gray-800">Loading...</h1>
             <p class="text-xs text-gray-500 mt-1">Please show this screen to order</p>
         </header>
 
-        <div class="flex justify-center gap-2 p-4 overflow-x-auto">
-            <button class="px-4 py-1 bg-orange-500 text-white rounded-full text-sm">English</button>
-            <button class="px-4 py-1 bg-white border border-gray-300 rounded-full text-sm text-gray-600">日本語</button>
-        </div>
-
         <div id="menu-list" class="p-4 space-y-4">
-            <p class="text-center text-gray-400 py-10">Loading menu...</p>
-        </div>
+            </div>
     </div>
 
     <script>
-        // Supabase接続設定
-        // ※本来は環境変数を使いますが、今回はブラウザ完結のため後ほどURLとKeyを直接埋め込むかVercelで連携します
-        async function fetchMenu() {
+        // Vercelに設定した環境変数を読み込む（Vercel公開時に自動適用されます）
+        const supabaseUrl = window.location.hostname === 'localhost' ? '' : 'https://' + window.location.hostname; 
+        
+        // ブラウザから直接Supabaseを呼ぶための設定（後ほどVercel側でパススルー設定をしますが、まずは基本コード）
+        const SUPABASE_URL = "https://ooyvztatkhadbquwimhz.supabase.co"; // あなたのURL
+        const SUPABASE_KEY = "sb_publishable_X43uA6B8_axn9ZJ2nLHvSw_lfv1W..."; // ここを自分のanon keyに書き換えてください
+
+        const supabase = supabasejs.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+        async function loadData() {
             const menuList = document.getElementById('menu-list');
-            // ここにデータ取得の処理を書いていきます
-            menuList.innerHTML = `
-                <div class="bg-white rounded-xl shadow-sm overflow-hidden border">
+            
+            // 1. 料理データを取得
+            const { data: menus, error } = await supabase.from('menus').select('*');
+
+            if (error || !menus || menus.length === 0) {
+                menuList.innerHTML = '<p class="text-center text-gray-400 py-10">メニューがまだ登録されていません。<br>管理画面から追加してください。</p>';
+                return;
+            }
+
+            // 2. 画面に表示
+            menuList.innerHTML = menus.map(item => `
+                <div class="bg-white rounded-xl shadow-sm overflow-hidden border ${item.is_sold_out ? 'opacity-50' : ''}">
                     <div class="p-4">
                         <div class="flex justify-between items-start">
-                            <h2 class="text-lg font-bold">Demo Menu Item</h2>
-                            <span class="font-bold text-orange-600">¥1,000</span>
+                            <h2 class="text-lg font-bold">${item.name_ja}</h2>
+                            <span class="font-bold text-orange-600">¥${item.price.toLocaleString()}</span>
                         </div>
-                        <p class="text-xs text-gray-400">Sample: サンプル料理</p>
-                        <p class="text-sm text-gray-600 mt-2">This is a placeholder. After connecting to Supabase, your real data will appear here.</p>
+                        ${item.is_sold_out ? '<span class="text-red-500 font-bold text-sm">SOLD OUT</span>' : ''}
                     </div>
                 </div>
-            `;
+            `).join('');
         }
-        fetchMenu();
+
+        loadData();
     </script>
 </body>
 </html>
