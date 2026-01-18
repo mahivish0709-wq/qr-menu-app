@@ -1,1 +1,51 @@
-<button onclick="alert('動いています！')">テストボタン</button>
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>管理画面</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        body { font-family: sans-serif; padding: 20px; text-align: center; }
+        input { display: block; margin: 10px auto; padding: 10px; width: 200px; }
+        button { padding: 10px 20px; background: #007bff; color: white; border: none; border-radius: 5px; cursor: pointer; }
+        #status { margin-top: 20px; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <h1>メニュー登録</h1>
+    <input id="n" type="text" placeholder="料理名（例：牛丼）">
+    <input id="p" type="number" placeholder="価格（例：800）">
+    <button onclick="save()">登録する</button>
+    <div id="status"></div>
+
+    <script>
+        const URL = "https://ooyvztatkhadbquwimhz.supabase.co";
+        const KEY = "sb_publishable_X43uA6B8_axn9ZJ2nLHvSw_lfv1W7m5O8K89O8yYf_nN8E8T8S8T8R8A8M8I8"; 
+        const supabase = supabasejs.createClient(URL, KEY);
+
+        async function save() {
+            const name = document.getElementById('n').value;
+            const price = document.getElementById('p').value;
+            const status = document.getElementById('status');
+
+            if(!name || !price) return alert("料理名と価格を入力してください");
+
+            status.innerText = "⏳ 保存しています...";
+            
+            try {
+                const { error } = await supabase
+                    .from('menus')
+                    .insert([{ name_ja: name, price: parseInt(price) }]);
+
+                if (error) throw error;
+                status.innerText = "✅ 登録完了！牛丼が表示されるはずです！";
+                document.getElementById('n').value = "";
+                document.getElementById('p').value = "";
+            } catch (err) {
+                status.innerText = "❌ エラー: " + err.message;
+                console.error(err);
+            }
+        }
+    </script>
+</body>
+</html>
