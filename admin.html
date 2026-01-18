@@ -2,65 +2,52 @@
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
-    <title>管理画面</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QRメニュー</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        body { font-family: 'Helvetica Neue', Arial, sans-serif; background-color: #f8f9fa; margin: 0; padding: 20px; }
+        .menu-item { background: white; border-radius: 12px; padding: 15px; margin-bottom: 15px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); display: flex; justify-content: space-between; align-items: center; }
+        .name { font-size: 18px; font-weight: bold; }
+        .price { color: #e44d26; font-size: 18px; font-weight: bold; }
+        h1 { text-align: center; color: #333; }
+    </style>
 </head>
-<body style="text-align:center; padding-top:50px; font-family:sans-serif;">
-
-    <h2>メニュー登録</h2>
-    <div style="margin-bottom:20px;">
-        <input id="n" type="text" value="牛丼" style="font-size:18px; padding:10px;">
-        <input id="p" type="number" value="800" style="font-size:18px; padding:10px; width:80px;">
-    </div>
-
-    <button id="b" style="font-size:25px; padding:20px 40px; background:green; color:white; border-radius:10px; cursor:pointer;"
-        onclick="registerMenu()">
-        登録を実行する
-    </button>
+<body>
+    <h1>MENU</h1>
+    <div id="menu-list">読み込み中...</div>
 
     <script>
-        async function registerMenu() {
-            const btn = document.getElementById('b');
+        const URL = "https://ooyvztatkhadbquwimhz.supabase.co";
+        const KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9veXZ6dGF0a2hhZGJxdXdpbWh6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njg3MjAxNTQsImV4cCI6MjA4NDI5NjE1NH0.8j_E3GTtXfe0ufDVksZhjHYfWVQIGw6nino80USV8no";
+        const supabase = supabasejs.createClient(URL, KEY);
+
+        async function loadMenu() {
+            const { data, error } = await supabase.from('menus').select('*');
+            const list = document.getElementById('menu-list');
             
-            // 道具箱が準備できているかチェック
-            if (typeof supabase === 'undefined' && typeof supabasejs === 'undefined') {
-                alert('準備中です。3秒待ってからもう一度押してください。');
+            if (error) {
+                list.innerText = "エラー: " + error.message;
                 return;
             }
 
-            const URL = 'https://ooyvztatkhadbquwimhz.supabase.co';
-            const KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9veXZ6dGF0a2hhZGJxdXdpbWh6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njg3MjAxNTQsImV4cCI6MjA4NDI5NjE1NH0.8j_E3GTtXfe0ufDVksZhjHYfWVQIGw6nino80USV8no';
-            
-            btn.innerText = '送信中...';
-            btn.style.background = 'gray';
+            list.innerHTML = "";
+            data.forEach(item => {
+                const div = document.createElement('div');
+                div.className = 'menu-item';
+                div.innerHTML = `
+                    <div class="name">${item.name_ja}</div>
+                    <div class="price">¥${item.price}</div>
+                `;
+                list.appendChild(div);
+            });
 
-            try {
-                // supabasejs または supabase のどちらでも動くように調整
-                const createClient = (typeof supabasejs !== 'undefined') ? supabasejs.createClient : supabase.createClient;
-                const client = createClient(URL, KEY);
-                
-                const name = document.getElementById('n').value;
-                const price = document.getElementById('p').value;
-
-                const { error } = await client
-                    .from('menus')
-                    .insert([{ name_ja: name, price: parseInt(price) }]);
-
-                if (error) {
-                    alert('エラー: ' + error.message);
-                    btn.innerText = '失敗（やり直す）';
-                    btn.style.background = 'red';
-                } else {
-                    alert('✅ 成功！！\n牛丼が登録されました！');
-                    btn.innerText = '登録完了！';
-                    btn.style.background = 'blue';
-                }
-            } catch (e) {
-                alert('エラー発生: ' + e.message);
-                btn.innerText = 'やり直す';
-                btn.style.background = 'orange';
+            if(data.length === 0) {
+                list.innerText = "メニューがまだ登録されていません。";
             }
         }
+
+        loadMenu();
     </script>
 </body>
 </html>
