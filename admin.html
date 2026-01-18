@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>管理画面 - メニュー登録</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body class="bg-gray-100 p-8">
+    <div class="max-w-md mx-auto bg-white p-6 rounded-xl shadow-md">
+        <h1 class="text-2xl font-bold mb-6">メニュー新規登録</h1>
+        
+        <div class="space-y-4">
+            <div>
+                <label class="block text-sm font-medium">料理名（日本語）</label>
+                <input id="name_ja" type="text" class="w-full border p-2 rounded" placeholder="例：肉じゃが">
+            </div>
+            <div>
+                <label class="block text-sm font-medium">価格 (円)</label>
+                <input id="price" type="number" class="w-full border p-2 rounded" placeholder="1000">
+            </div>
+            <button onclick="saveMenu()" id="save-btn" class="w-full bg-blue-600 text-white py-2 rounded font-bold hover:bg-blue-700">
+                登録する
+            </button>
+        </div>
+        <div id="status" class="mt-4 text-center text-sm"></div>
+    </div>
+
+    <script>
+        // あなたの情報をこちらで埋め込みました！
+        const SUPABASE_URL = "https://ooyvztatkhadbquwimhz.supabase.co";
+        const SUPABASE_KEY = "sb_publishable_X43uA6B8_axn9ZJ2nLHvSw_lfv1W7m5O8K89O8yYf_nN8E8T8S8T8R8A8M8I8"; 
+
+        const supabase = supabasejs.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+        async function saveMenu() {
+            const btn = document.getElementById('save-btn');
+            const status = document.getElementById('status');
+            const name = document.getElementById('name_ja').value;
+            const price = document.getElementById('price').value;
+
+            if(!name || !price) return alert('入力してください');
+
+            btn.disabled = true;
+            status.innerText = "保存中...";
+
+            // データベースに保存
+            const { error } = await supabase.from('menus').insert([
+                { name_ja: name, price: parseInt(price) }
+            ]);
+
+            if (error) {
+                status.innerText = "エラー: " + error.message;
+                console.error(error);
+            } else {
+                status.innerText = "✅ 登録完了！";
+                document.getElementById('name_ja').value = "";
+                document.getElementById('price').value = "";
+            }
+            btn.disabled = false;
+        }
+    </script>
+</body>
+</html>
