@@ -5,41 +5,42 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
-    <h3>メニュー登録</h3>
-    <input id="n" type="text" placeholder="料理名">
-    <input id="p" type="number" placeholder="価格">
-    <button id="b">登録を実行する</button>
+    <h3>メニュー登録（最終確認版）</h3>
+    <input id="n" type="text" placeholder="料理名" value="牛丼">
+    <input id="p" type="number" placeholder="価格" value="800">
+    <button id="b" style="padding:10px; background:orange;">これを押して！</button>
     <div id="s"></div>
 
     <script>
-        // 画面が読み込まれてから確実にボタンとプログラムを繋ぐ書き方です
+        // 設定値から余計な空白を徹底的に排除する処理を入れました
+        const URL = "https://ooyvztatkhadbquwimhz.supabase.co".trim();
+        const KEY = "sb_publishable_X43uA6B8_axn9ZJ2nLHvSw_lfv1W7m5O8K89O8yYf_nN8E8T8S8T8R8A8M8I8".trim();
+        
         window.onload = function() {
-            const URL = "https://ooyvztatkhadbquwimhz.supabase.co";
-            const KEY = "sb_publishable_X43uA6B8_axn9ZJ2nLHvSw_lfv1W7m5O8K89O8yYf_nN8E8T8S8T8R8A8M8I8"; 
             const supabase = supabasejs.createClient(URL, KEY);
+            const btn = document.getElementById('b');
+            const status = document.getElementById('s');
 
-            document.getElementById('b').onclick = async function() {
+            btn.onclick = async function() {
                 const name = document.getElementById('n').value;
                 const price = document.getElementById('p').value;
-                const status = document.getElementById('s');
 
-                if(!name || !price) {
-                    alert("名前と価格を入れてください");
-                    return;
-                }
-
-                status.innerText = "通信中...";
-
+                status.innerText = "送信を開始します...";
+                
                 try {
                     const { error } = await supabase
                         .from('menus')
                         .insert([{ name_ja: name, price: parseInt(price) }]);
 
-                    if (error) throw error;
-                    status.innerText = "✅ 成功！牛丼を登録しました！";
+                    if (error) {
+                        alert("エラー発生: " + error.message);
+                        status.innerText = "失敗しました";
+                    } else {
+                        alert("✅ 成功！牛丼を登録しました！");
+                        status.innerText = "登録完了しました！";
+                    }
                 } catch (e) {
-                    status.innerText = "❌ 失敗: " + e.message;
-                    console.error(e);
+                    alert("接続に失敗しました: " + e.message);
                 }
             };
         };
