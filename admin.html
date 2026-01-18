@@ -3,57 +3,48 @@
 <head>
     <meta charset="UTF-8">
     <title>管理画面</title>
-    <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
-<body class="bg-gray-100 p-8">
-    <div class="max-w-md mx-auto bg-white p-6 rounded-xl shadow-md">
-        <h1 class="text-2xl font-bold mb-6">メニュー登録</h1>
-        <input id="name_ja" type="text" class="w-full border p-2 mb-4" placeholder="料理名（例：牛丼）">
-        <input id="price" type="number" class="w-full border p-2 mb-4" placeholder="価格（例：800）">
-        <button onclick="save()" id="btn" class="w-full bg-blue-600 text-white py-2 rounded font-bold cursor-pointer hover:bg-blue-700 active:scale-95 transition-all">
-            登録する
-        </button>
-        <div id="status" class="mt-4 text-center font-bold min-h-[1.5rem]"></div>
-    </div>
+<body>
+    <h1>メニュー登録</h1>
+    <input id="n" type="text" placeholder="料理名（例：牛丼）">
+    <input id="p" type="number" placeholder="価格（例：800）">
+    <button id="b">登録する</button>
+    <p id="s"></p>
 
     <script>
-        const URL = "https://ooyvztatkhadbquwimhz.supabase.co";
-        const KEY = "sb_publishable_X43uA6B8_axn9ZJ2nLHvSw_lfv1W7m5O8K89O8yYf_nN8E8T8S8T8R8A8M8I8"; 
-        const supabase = supabasejs.createClient(URL, KEY);
+        // ボタンに直接命令を出す「確実な方法」に変更しました
+        window.onload = function() {
+            const URL = "https://ooyvztatkhadbquwimhz.supabase.co";
+            const KEY = "sb_publishable_X43uA6B8_axn9ZJ2nLHvSw_lfv1W7m5O8K89O8yYf_nN8E8T8S8T8R8A8M8I8"; 
+            const supabase = supabasejs.createClient(URL, KEY);
+            const btn = document.getElementById('b');
 
-        async function save() {
-            const name = document.getElementById('name_ja').value;
-            const price = document.getElementById('price').value;
-            const status = document.getElementById('status');
-            const btn = document.getElementById('btn');
+            btn.addEventListener('click', async () => {
+                const name = document.getElementById('n').value;
+                const price = document.getElementById('p').value;
+                const status = document.getElementById('s');
 
-            if(!name || !price) {
-                alert("料理名と価格を入力してください");
-                return;
-            }
+                if(!name || !price) {
+                    alert("料理名と価格を入力してください");
+                    return;
+                }
 
-            // 通信状態を表示
-            status.innerText = "⏳ データベースに保存中...";
-            status.style.color = "blue";
-            
-            try {
-                const { error } = await supabase
-                    .from('menus')
-                    .insert([{ name_ja: name, price: parseInt(price) }]);
+                status.innerText = "⏳ 保存中...";
+                
+                try {
+                    const { error } = await supabase
+                        .from('menus')
+                        .insert([{ name_ja: name, price: parseInt(price) }]);
 
-                if (error) throw error;
-
-                status.innerText = "✅ 登録できました！";
-                status.style.color = "green";
-                document.getElementById('name_ja').value = "";
-                document.getElementById('price').value = "";
-            } catch (err) {
-                status.innerText = "❌ エラー: " + err.message;
-                status.style.color = "red";
-                console.error(err);
-            }
-        }
+                    if (error) throw error;
+                    status.innerText = "✅ 登録完了！";
+                } catch (err) {
+                    status.innerText = "❌ エラー: " + err.message;
+                    console.error(err);
+                }
+            });
+        };
     </script>
 </body>
 </html>
