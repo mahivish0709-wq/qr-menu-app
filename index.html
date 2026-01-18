@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Multi-language Menu</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body class="bg-gray-50">
+    <div id="app" class="max-w-md mx-auto min-h-screen pb-20">
+        <header class="bg-white shadow-sm sticky top-0 z-10 p-4 text-center">
+            <h1 class="text-xl font-bold text-gray-800">Welcome!</h1>
+            <p class="text-xs text-gray-500 mt-1">Please show this screen to order</p>
+        </header>
+
+        <div class="flex justify-center gap-2 p-4 overflow-x-auto">
+            <button class="px-4 py-1 bg-orange-500 text-white rounded-full text-sm">English</button>
+            <button class="px-4 py-1 bg-white border border-gray-300 rounded-full text-sm text-gray-600">日本語</button>
+        </div>
+
+        <div id="menu-list" class="p-4 space-y-4">
+            <p class="text-center text-gray-400 py-10">Loading menu...</p>
+        </div>
+    </div>
+
+    <script>
+        // Supabase接続設定
+        // ※本来は環境変数を使いますが、今回はブラウザ完結のため後ほどURLとKeyを直接埋め込むかVercelで連携します
+        async function fetchMenu() {
+            const menuList = document.getElementById('menu-list');
+            // ここにデータ取得の処理を書いていきます
+            menuList.innerHTML = `
+                <div class="bg-white rounded-xl shadow-sm overflow-hidden border">
+                    <div class="p-4">
+                        <div class="flex justify-between items-start">
+                            <h2 class="text-lg font-bold">Demo Menu Item</h2>
+                            <span class="font-bold text-orange-600">¥1,000</span>
+                        </div>
+                        <p class="text-xs text-gray-400">Sample: サンプル料理</p>
+                        <p class="text-sm text-gray-600 mt-2">This is a placeholder. After connecting to Supabase, your real data will appear here.</p>
+                    </div>
+                </div>
+            `;
+        }
+        fetchMenu();
+    </script>
+</body>
+</html>
