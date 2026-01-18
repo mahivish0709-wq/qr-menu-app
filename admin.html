@@ -12,36 +12,10 @@
     <div id="s"></div>
 
     <script>
-        // 設定値から余計な空白を徹底的に排除する処理を入れました
-        const URL = "https://ooyvztatkhadbquwimhz.supabase.co".trim();
-        const KEY = "sb_publishable_X43uA6B8_axn9ZJ2nLHvSw_lfv1W7m5O8K89O8yYf_nN8E8T8S8T8R8A8M8I8".trim();
-        
         window.onload = function() {
-            const supabase = supabasejs.createClient(URL, KEY);
             const btn = document.getElementById('b');
-            const status = document.getElementById('s');
-
-            btn.onclick = async function() {
-                const name = document.getElementById('n').value;
-                const price = document.getElementById('p').value;
-
-                status.innerText = "送信を開始します...";
-                
-                try {
-                    const { error } = await supabase
-                        .from('menus')
-                        .insert([{ name_ja: name, price: parseInt(price) }]);
-
-                    if (error) {
-                        alert("エラー発生: " + error.message);
-                        status.innerText = "失敗しました";
-                    } else {
-                        alert("✅ 成功！牛丼を登録しました！");
-                        status.innerText = "登録完了しました！";
-                    }
-                } catch (e) {
-                    alert("接続に失敗しました: " + e.message);
-                }
+            btn.onclick = function() {
+                alert("ボタンの反応を確認しました！次は通信を直します。");
             };
         };
     </script>
