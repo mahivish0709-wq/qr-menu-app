@@ -14,39 +14,53 @@
     </div>
 
     <button id="b" style="font-size:25px; padding:20px 40px; background:green; color:white; border-radius:10px; cursor:pointer;"
-        onclick="
-            const URL = 'https://ooyvztatkhadbquwimhz.supabase.co';
-            const KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9veXZ6dGF0a2hhZGJxdXdpbWh6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njg3MjAxNTQsImV4cCI6MjA4NDI5NjE1NH0.8j_E3GTtXfe0ufDVksZhjHYfWVQIGw6nino80USV8no';
-            
-            // ボタンの表示を変えて反応を確認
-            this.innerText = '送信中...';
-            this.style.background = 'gray';
-
-            try {
-                const supabase = supabasejs.createClient(URL, KEY);
-                const name = document.getElementById('n').value;
-                const price = document.getElementById('p').value;
-
-                supabase.from('menus').insert([{ name_ja: name, price: parseInt(price) }])
-                .then(result => {
-                    if (result.error) {
-                        alert('エラー発生: ' + result.error.message);
-                        this.innerText = '失敗（やり直す）';
-                        this.style.background = 'red';
-                    } else {
-                        alert('✅ 成功！！\nデータベースに牛丼が登録されました！');
-                        this.innerText = '登録完了！';
-                        this.style.background = 'blue';
-                    }
-                });
-            } catch (e) {
-                alert('プログラムエラー: ' + e.message);
-            }
-        ">
+        onclick="registerMenu()">
         登録を実行する
     </button>
 
-    <p style="margin-top:30px; color:gray;">※ボタンを押して「送信中...」に変われば成功目前です</p>
+    <script>
+        async function registerMenu() {
+            const btn = document.getElementById('b');
+            
+            // 道具箱が準備できているかチェック
+            if (typeof supabase === 'undefined' && typeof supabasejs === 'undefined') {
+                alert('準備中です。3秒待ってからもう一度押してください。');
+                return;
+            }
 
+            const URL = 'https://ooyvztatkhadbquwimhz.supabase.co';
+            const KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9veXZ6dGF0a2hhZGJxdXdpbWh6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njg3MjAxNTQsImV4cCI6MjA4NDI5NjE1NH0.8j_E3GTtXfe0ufDVksZhjHYfWVQIGw6nino80USV8no';
+            
+            btn.innerText = '送信中...';
+            btn.style.background = 'gray';
+
+            try {
+                // supabasejs または supabase のどちらでも動くように調整
+                const createClient = (typeof supabasejs !== 'undefined') ? supabasejs.createClient : supabase.createClient;
+                const client = createClient(URL, KEY);
+                
+                const name = document.getElementById('n').value;
+                const price = document.getElementById('p').value;
+
+                const { error } = await client
+                    .from('menus')
+                    .insert([{ name_ja: name, price: parseInt(price) }]);
+
+                if (error) {
+                    alert('エラー: ' + error.message);
+                    btn.innerText = '失敗（やり直す）';
+                    btn.style.background = 'red';
+                } else {
+                    alert('✅ 成功！！\n牛丼が登録されました！');
+                    btn.innerText = '登録完了！';
+                    btn.style.background = 'blue';
+                }
+            } catch (e) {
+                alert('エラー発生: ' + e.message);
+                btn.innerText = 'やり直す';
+                btn.style.background = 'orange';
+            }
+        }
+    </script>
 </body>
 </html>
