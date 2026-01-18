@@ -11,12 +11,13 @@
         <h1 class="text-2xl font-bold mb-6">メニュー登録</h1>
         <input id="name_ja" type="text" class="w-full border p-2 mb-4" placeholder="料理名（例：牛丼）">
         <input id="price" type="number" class="w-full border p-2 mb-4" placeholder="価格（例：800）">
-        <button onclick="save()" id="btn" class="w-full bg-blue-600 text-white py-2 rounded font-bold">登録する</button>
-        <div id="status" class="mt-4 text-center font-bold"></div>
+        <button onclick="save()" id="btn" class="w-full bg-blue-600 text-white py-2 rounded font-bold cursor-pointer hover:bg-blue-700 active:scale-95 transition-all">
+            登録する
+        </button>
+        <div id="status" class="mt-4 text-center font-bold min-h-[1.5rem]"></div>
     </div>
 
     <script>
-        // あなたの最新情報を反映しました
         const URL = "https://ooyvztatkhadbquwimhz.supabase.co";
         const KEY = "sb_publishable_X43uA6B8_axn9ZJ2nLHvSw_lfv1W7m5O8K89O8yYf_nN8E8T8S8T8R8A8M8I8"; 
         const supabase = supabasejs.createClient(URL, KEY);
@@ -32,26 +33,26 @@
                 return;
             }
 
-            btn.disabled = true;
-            status.innerText = "通信中...";
-            status.style.color = "black";
+            // 通信状態を表示
+            status.innerText = "⏳ データベースに保存中...";
+            status.style.color = "blue";
             
-            // データの挿入を実行
-            const { error } = await supabase
-                .from('menus')
-                .insert([{ name_ja: name, price: parseInt(price) }]);
+            try {
+                const { error } = await supabase
+                    .from('menus')
+                    .insert([{ name_ja: name, price: parseInt(price) }]);
 
-            if (error) {
-                status.innerText = "エラー発生: " + error.message;
-                status.style.color = "red";
-                console.error(error);
-            } else {
+                if (error) throw error;
+
                 status.innerText = "✅ 登録できました！";
                 status.style.color = "green";
                 document.getElementById('name_ja').value = "";
                 document.getElementById('price').value = "";
+            } catch (err) {
+                status.innerText = "❌ エラー: " + err.message;
+                status.style.color = "red";
+                console.error(err);
             }
-            btn.disabled = false;
         }
     </script>
 </body>
