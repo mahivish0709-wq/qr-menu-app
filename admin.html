@@ -1,53 +1,37 @@
 <!DOCTYPE html>
 <html lang="ja">
-<head>
-    <meta charset="UTF-8">
-    <title>管理画面</title>
-    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
-</head>
+<head><meta charset="UTF-8"><title>AI管理画面</title><script src="https://unpkg.com/@supabase/supabase-js@2"></script></head>
 <body style="text-align:center; padding-top:50px; font-family:sans-serif;">
-
-    <h2>メニュー登録</h2>
-    <div style="margin-bottom:20px;">
-        <input id="n" type="text" value="牛丼" style="font-size:18px; padding:10px;">
-        <input id="p" type="number" value="800" style="font-size:18px; padding:10px; width:80px;">
-    </div>
-
-    <button id="b" style="font-size:20px; padding:15px 30px; cursor:pointer;" onclick="add()">登録実行</button>
-    <div id="msg" style="margin-top:20px; font-weight:bold;"></div>
+    <h2>AIメニュー登録</h2>
+    <input id="n" type="text" placeholder="料理名（日本語）" style="padding:10px;">
+    <input id="p" type="number" placeholder="価格" style="padding:10px; width:80px;">
+    <button id="b" onclick="addWithAI()" style="padding:10px 20px; cursor:pointer;">AI翻訳して登録</button>
+    <div id="msg" style="margin-top:20px;"></div>
 
     <script>
-        async function add() {
+        async function addWithAI() {
             const msg = document.getElementById('msg');
-            msg.style.color = "black";
-            msg.innerText = "通信中...";
-
+            msg.innerText = "AI翻訳中...";
             const URL = 'https://ooyvztatkhadbquwimhz.supabase.co';
             const KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9veXZ6dGF0a2hhZGJxdXdpbWh6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njg3MjAxNTQsImV4cCI6MjA4NDI5NjE1NH0.8j_E3GTtXfe0ufDVksZhjHYfWVQIGw6nino80USV8no';
+            const client = supabase.createClient(URL, KEY);
+
+            const name = document.getElementById('n').value;
+            const price = document.getElementById('p').value;
+
+            // 翻訳関数
+            const tr = async (t, l) => {
+                const res = await fetch(`https://translate.googleapis.com/translate_a/single?client=gtx&sl=ja&tl=${l}&dt=t&q=${encodeURI(t)}`);
+                const j = await res.json(); return j[0][0][0];
+            };
 
             try {
-                // supabasejs ではなく supabase.createClient を使用
-                const client = supabase.createClient(URL, KEY);
-                
-                const name = document.getElementById('n').value;
-                const price = document.getElementById('p').value;
-
+                const [en, ko, zh] = await Promise.all([tr(name,'en'), tr(name,'ko'), tr(name,'zh-CN')]);
                 const { error } = await client.from('menus').insert([{ 
-                    name_ja: name, 
-                    price: parseInt(price) 
+                    name_ja: name, name_en: en, name_ko: ko, name_zh: zh, price: parseInt(price) 
                 }]);
-
-                if (error) {
-                    msg.style.color = "red";
-                    msg.innerText = "❌ 失敗: " + error.message;
-                } else {
-                    msg.style.color = "green";
-                    msg.innerText = "✅ 成功！牛丼が登録されました！";
-                }
-            } catch (e) {
-                msg.style.color = "red";
-                msg.innerText = "❌ エラー: " + e.message;
-            }
+                msg.innerText = error ? "❌エラー" : `✅成功！\n🇺🇸${en}\n🇰🇷${ko}\n🇨🇳${zh}`;
+            } catch (e) { msg.innerText = "❌エラー: " + e.message; }
         }
     </script>
 </body>
