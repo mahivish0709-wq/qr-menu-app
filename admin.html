@@ -1,30 +1,52 @@
 <!DOCTYPE html>
 <html lang="ja">
-<head><meta charset="UTF-8"><title>診断用管理画面</title><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script></head>
-<body style="text-align:center; padding-top:50px;">
-    <h2>診断モード：登録テスト</h2>
-    <button id="b" style="padding:20px;" onclick="add()">登録ボタンを押す</button>
-    <div id="msg" style="margin-top:20px; color:red; font-weight:bold;">ここに診断結果が出ます</div>
+<head>
+    <meta charset="UTF-8">
+    <title>管理画面</title>
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+</head>
+<body style="text-align:center; padding-top:50px; font-family:sans-serif;">
+
+    <h2>メニュー登録</h2>
+    <div style="margin-bottom:20px;">
+        <input id="n" type="text" value="牛丼" style="font-size:18px; padding:10px;">
+        <input id="p" type="number" value="800" style="font-size:18px; padding:10px; width:80px;">
+    </div>
+
+    <button id="b" style="font-size:20px; padding:15px 30px; cursor:pointer;" onclick="add()">登録実行</button>
+    <div id="msg" style="margin-top:20px; font-weight:bold;"></div>
 
     <script>
-        const URL = 'https://ooyvztatkhadbquwimhz.supabase.co';
-        const KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9veXZ6dGF0a2hhZGJxdXdpbWh6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njg3MjAxNTQsImV4cCI6MjA4NDI5NjE1NH0.8j_E3GTtXfe0ufDVksZhjHYfWVQIGw6nino80USV8no';
-        
         async function add() {
             const msg = document.getElementById('msg');
+            msg.style.color = "black";
             msg.innerText = "通信中...";
+
+            const URL = 'https://ooyvztatkhadbquwimhz.supabase.co';
+            const KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9veXZ6dGF0a2hhZGJxdXdpbWh6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njg3MjAxNTQsImV4cCI6MjA4NDI5NjE1NH0.8j_E3GTtXfe0ufDVksZhjHYfWVQIGw6nino80USV8no';
+
             try {
-                const supabase = supabasejs.createClient(URL, KEY);
-                const { error } = await supabase.from('menus').insert([{ name_ja: 'テスト牛丼', price: 900 }]);
+                // supabasejs ではなく supabase.createClient を使用
+                const client = supabase.createClient(URL, KEY);
                 
+                const name = document.getElementById('n').value;
+                const price = document.getElementById('p').value;
+
+                const { error } = await client.from('menus').insert([{ 
+                    name_ja: name, 
+                    price: parseInt(price) 
+                }]);
+
                 if (error) {
-                    msg.innerText = "❌ 失敗！理由: " + error.message;
+                    msg.style.color = "red";
+                    msg.innerText = "❌ 失敗: " + error.message;
                 } else {
                     msg.style.color = "green";
-                    msg.innerText = "✅ 成功しました！";
+                    msg.innerText = "✅ 成功！牛丼が登録されました！";
                 }
             } catch (e) {
-                msg.innerText = "❌ プログラムエラー: " + e.message;
+                msg.style.color = "red";
+                msg.innerText = "❌ エラー: " + e.message;
             }
         }
     </script>
