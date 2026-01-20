@@ -1,18 +1,40 @@
 <!DOCTYPE html>
 <html lang="ja">
-<head><meta charset="UTF-8"><title>メニュー</title><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script></head>
-<body style="text-align:center; font-family:sans-serif;">
-    <h1>MENU</h1>
+<head>
+    <meta charset="UTF-8">
+    <title>メニュー</title>
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+    <style>
+        body { font-family: sans-serif; text-align: center; background: #f9f9f9; padding: 20px; }
+        .item { background: white; padding: 15px; margin: 10px auto; max-width: 300px; border-radius: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); display: flex; justify-content: space-between; }
+        .price { color: #e44d26; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <h1>店のお品書き</h1>
     <div id="list">読み込み中...</div>
+
     <script>
-        const URL = 'https://ooyvztatkhadbquwimhz.supabase.co';
-        const KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9veXZ6dGF0a2hhZGJxdXdpbWh6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njg3MjAxNTQsImV4cCI6MjA4NDI5NjE1NH0.8j_E3GTtXfe0ufDVksZhjHYfWVQIGw6nino80USV8no';
-        const supabase = supabasejs.createClient(URL, KEY);
         async function load() {
-            const { data, error } = await supabase.from('menus').select('*');
+            const URL = 'https://ooyvztatkhadbquwimhz.supabase.co';
+            const KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9veXZ6dGF0a2hhZGJxdXdpbWh6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njg3MjAxNTQsImV4cCI6MjA4NDI5NjE1NH0.8j_E3GTtXfe0ufDVksZhjHYfWVQIGw6nino80USV8no';
+            const client = supabase.createClient(URL, KEY);
+            
+            const { data, error } = await client.from('menus').select('*');
             const div = document.getElementById('list');
-            if (error) { div.innerText = 'エラー: ' + error.message; return; }
-            div.innerHTML = data.length ? data.map(m => `<p>${m.name_ja} : ${m.price}円</p>`).join('') : 'メニューがありません';
+
+            if (error) {
+                div.innerText = 'エラー: ' + error.message;
+            } else if (data.length === 0) {
+                div.innerText = 'まだ登録されたメニューがありません。';
+            } else {
+                div.innerHTML = data.map(m => `
+                    <div class="item">
+                        <span>${m.name_ja}</span>
+                        <span class="price">${m.price}円</span>
+                    </div>
+                `).join('');
+            }
         }
         load();
     </script>
