@@ -7,47 +7,54 @@
     <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
     <style>
         body { font-family: sans-serif; text-align: center; background: #f4f7f6; padding: 20px; }
-        .lang-buttons { margin-bottom: 20px; display: flex; justify-content: center; gap: 10px; flex-wrap: wrap; }
-        button { padding: 10px 15px; border: none; border-radius: 20px; background: white; cursor: pointer; box-shadow: 0 2px 4px rgba(0,0,0,0.1); font-size: 14px; }
+        .lang-buttons { margin-bottom: 20px; display: flex; justify-content: center; gap: 10px; }
+        button { padding: 10px 15px; border: none; border-radius: 20px; background: white; cursor: pointer; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
         button.active { background: #007bff; color: white; }
-        .menu-card { background: white; padding: 20px; margin: 10px auto; max-width: 350px; border-radius: 15px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
-        .price { color: #e44d26; font-size: 20px; font-weight: bold; }
-        .name { font-size: 18px; font-weight: bold; }
+        .menu-card { background: white; padding: 15px; margin: 10px auto; max-width: 350px; border-radius: 12px; display: flex; justify-content: space-between; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+        #debug-msg { color: red; font-size: 12px; margin-bottom: 10px; }
     </style>
 </head>
 <body>
-    <h1 id="title">MENU</h1>
-
-    <div class="lang-buttons">
+    <h1>MENU</h1>
+    <div id="debug-msg"></div> <div class="lang-buttons">
         <button onclick="changeLang('ja')" id="btn-ja" class="active">日本語</button>
         <button onclick="changeLang('en')" id="btn-en">English</button>
         <button onclick="changeLang('ko')" id="btn-ko">한국어</button>
         <button onclick="changeLang('zh')" id="btn-zh">中文</button>
     </div>
 
-    <div id="menu-list">読み込み中...</div>
+    <div id="menu-list">データを読み込んでいます...</div>
 
     <script>
         const URL = 'https://ooyvztatkhadbquwimhz.supabase.co';
         const KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9veXZ6dGF0a2hhZGJxdXdpbWh6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njg3MjAxNTQsImV4cCI6MjA4NDI5NjE1NH0.8j_E3GTtXfe0ufDVksZhjHYfWVQIGw6nino80USV8no';
-        const supabaseClient = supabase.createClient(URL, KEY);
-
+        
         let currentLang = 'ja';
         let menuData = [];
 
         async function fetchMenu() {
-            const { data, error } = await supabaseClient.from('menus').select('*');
-            if (error) {
-                document.getElementById('menu-list').innerText = "エラー: " + error.message;
-                return;
+            const debug = document.getElementById('debug-msg');
+            const list = document.getElementById('menu-list');
+            
+            try {
+                const supabaseClient = supabase.createClient(URL, KEY);
+                const { data, error } = await supabaseClient.from('menus').select('*');
+
+                if (error) {
+                    debug.innerText = "エラー: " + error.message;
+                    list.innerText = "読み込みに失敗しました。";
+                    return;
+                }
+
+                menuData = data;
+                render();
+            } catch (e) {
+                debug.innerText = "プログラム実行エラー: " + e.message;
             }
-            menuData = data;
-            render();
         }
 
         function changeLang(lang) {
             currentLang = lang;
-            // ボタンの見た目を変える
             document.querySelectorAll('.lang-buttons button').forEach(b => b.classList.remove('active'));
             document.getElementById('btn-' + lang).classList.add('active');
             render();
@@ -56,17 +63,16 @@
         function render() {
             const list = document.getElementById('menu-list');
             if (menuData.length === 0) {
-                list.innerText = "メニューがありません。";
+                list.innerText = "まだメニューが登録されていません。";
                 return;
             }
 
             list.innerHTML = menuData.map(item => {
-                // 言語に合わせて名前を選択（name_ja, name_en など）
                 const displayName = item['name_' + currentLang] || item['name_ja'];
                 return `
                     <div class="menu-card">
-                        <span class="name">${displayName}</span>
-                        <span class="price">¥${item.price}</span>
+                        <span>${displayName}</span>
+                        <span style="color:#e44d26; font-weight:bold;">¥${item.price}</span>
                     </div>
                 `;
             }).join('');
