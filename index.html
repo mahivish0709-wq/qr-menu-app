@@ -1,59 +1,20 @@
 <!DOCTYPE html>
 <html lang="ja">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Multi-language Menu</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-</head>
-<body class="bg-gray-50">
-    <div id="app" class="max-w-md mx-auto min-h-screen pb-20">
-        <header class="bg-white shadow-sm sticky top-0 z-10 p-4 text-center">
-            <h1 id="shop-name" class="text-xl font-bold text-gray-800">Loading...</h1>
-            <p class="text-xs text-gray-500 mt-1">Please show this screen to order</p>
-        </header>
-
-        <div id="menu-list" class="p-4 space-y-4">
-            </div>
-    </div>
-
+<head><meta charset="UTF-8"><title>メニュー</title><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script></head>
+<body style="text-align:center; font-family:sans-serif;">
+    <h1>MENU</h1>
+    <div id="list">読み込み中...</div>
     <script>
-        // Vercelに設定した環境変数を読み込む（Vercel公開時に自動適用されます）
-        const supabaseUrl = window.location.hostname === 'localhost' ? '' : 'https://' + window.location.hostname; 
-        
-        // ブラウザから直接Supabaseを呼ぶための設定（後ほどVercel側でパススルー設定をしますが、まずは基本コード）
-        const SUPABASE_URL = "https://ooyvztatkhadbquwimhz.supabase.co"; // あなたのURL
-        const SUPABASE_KEY = "sb_publishable_X43uA6B8_axn9ZJ2nLHvSw_lfv1W..."; // ここを自分のanon keyに書き換えてください
-
-        const supabase = supabasejs.createClient(SUPABASE_URL, SUPABASE_KEY);
-
-        async function loadData() {
-            const menuList = document.getElementById('menu-list');
-            
-            // 1. 料理データを取得
-            const { data: menus, error } = await supabase.from('menus').select('*');
-
-            if (error || !menus || menus.length === 0) {
-                menuList.innerHTML = '<p class="text-center text-gray-400 py-10">メニューがまだ登録されていません。<br>管理画面から追加してください。</p>';
-                return;
-            }
-
-            // 2. 画面に表示
-            menuList.innerHTML = menus.map(item => `
-                <div class="bg-white rounded-xl shadow-sm overflow-hidden border ${item.is_sold_out ? 'opacity-50' : ''}">
-                    <div class="p-4">
-                        <div class="flex justify-between items-start">
-                            <h2 class="text-lg font-bold">${item.name_ja}</h2>
-                            <span class="font-bold text-orange-600">¥${item.price.toLocaleString()}</span>
-                        </div>
-                        ${item.is_sold_out ? '<span class="text-red-500 font-bold text-sm">SOLD OUT</span>' : ''}
-                    </div>
-                </div>
-            `).join('');
+        const URL = 'https://ooyvztatkhadbquwimhz.supabase.co';
+        const KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9veXZ6dGF0a2hhZGJxdXdpbWh6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njg3MjAxNTQsImV4cCI6MjA4NDI5NjE1NH0.8j_E3GTtXfe0ufDVksZhjHYfWVQIGw6nino80USV8no';
+        const supabase = supabasejs.createClient(URL, KEY);
+        async function load() {
+            const { data, error } = await supabase.from('menus').select('*');
+            const div = document.getElementById('list');
+            if (error) { div.innerText = 'エラー: ' + error.message; return; }
+            div.innerHTML = data.length ? data.map(m => `<p>${m.name_ja} : ${m.price}円</p>`).join('') : 'メニューがありません';
         }
-
-        loadData();
+        load();
     </script>
 </body>
 </html>
